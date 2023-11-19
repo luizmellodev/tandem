@@ -18,6 +18,7 @@ class FilaTandem:
         self.escalonador_eventos = []
         self.tabela_estados_fila1 = []
         self.tabela_estados_fila2 = []
+        
         # cria um vetor estado inicial com tamanho 3 + (capacidade + 1)
         fila_1_estado = [0.0] * (4 + (self.fila_1_capacidade + 1))
         fila_1_estado[0] = None

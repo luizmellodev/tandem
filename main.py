@@ -1,32 +1,61 @@
-from FilaTandem import FilaTandem
-from utils import calculaResultados, createSeeds, escreveResultados
+from Fila import Fila
+from Evento import Evento
+from Fila import TipoFila
+from LCG import LCG
+from Fila import Controller
+class Main:
+    def __init__(self):
+        self.filas = []
+        self.numeros_aleatorios = []
 
+    def execute(self):
+        seeds = [0.9921, 0.0004, 0.5534, 0.2761, 0.3398]        
+        a = 1664525
+        c = 1013904223
+        M = 2**32
+        aleatorios = 10
+        for seed in seeds:
+            for fila in self.filas:
+                lcg = LCG(seed, a, c, M)
+                fila.aleatorios = [lcg.rand() for _ in range(aleatorios)]
+                
 
-config = {
-        'fila_1_arrival_limits':[1,3],
-        'fila_1_service_limits':[2,4],
-        'fila_2_service_limits':[1,3],
-        'seeds':[],
-        'fila_1_servidores':2,
-        'fila_1_capacidade':3,
-        'fila_2_servidores':1,
-        'fila_2_capacidade':5
-}
+    def criar_filas(self):
+            fila1 = Fila(
+                tipo=TipoFila.SIMPLES,
+                tempo_chegada=[1, 3],
+                tempo_saida=[2, 4],
+                tempo_primeira_chegada=3,
+                num_servidores=1,
+                capacidade=5,
+                eventos=[],
+                servidores_ocupados=0,
+                aleatorios=[]
+            )
+            self.filas.append(fila1)
 
-seeds = [0.9921, 0.0004, 0.5534, 0.2761, 0.3398]
+            fila2 = Fila(
+                tipo=TipoFila.TANDEM,
+                tempo_chegada=[1,3],
+                tempo_saida=[2, 4],
+                tempo_primeira_chegada=3,
+                num_servidores=2,
+                capacidade=5,
+                eventos=[],
+                servidores_ocupados=0,
+                aleatorios=[]
+            )
+            self.filas.append(fila2)
 
-fila_1_simulados = []
-fila_2_simulados = []
-for seed in seeds:
-    seeds = createSeeds(seed, 100000)
-    config['seeds'] = seeds
-    filaTandem = FilaTandem(config)
-    estados1, estados2 = filaTandem.escalonador(2.5000)
-    fila_1_simulados.append(estados1[3:])
-    fila_2_simulados.append(estados2[3:])
-    
-resultados1 = calculaResultados(fila_1_simulados, config['fila_1_capacidade'])
-resultados2 = calculaResultados(fila_2_simulados, config['fila_2_capacidade'])
+    def imprimir_filas(self):
+        for i, fila in enumerate(self.filas, start=1):
+            print(f"=== Fila {i} criada ===")
+            fila.imprimir_valores()
+            print()
 
-escreveResultados([fila_1_simulados, fila_2_simulados], 'resultados_media.txt')
-escreveResultados([resultados1, resultados2], 'estatisticas.txt')
+# Exemplo de uso
+if __name__ == "__main__":
+    main = Main()
+    main.criar_filas()
+    main.execute()
+    controller = Controller(main.filas, 3)
